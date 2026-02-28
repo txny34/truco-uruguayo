@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(cuid())
+  nombre     String
+  email      String   @unique
+  password   String
+  elo        Int      @default(1000)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  partidas   PartidaJugador[]
+
+  @@map("users")
+}
+
+model Partida {
+  id            String   @id @default(cuid())
+  salaId        String
+  ganadorEquipo Int
+  puntajeEq1   Int
+  puntajeEq2   Int
+  duracion      Int       // duración en segundos
+  creadaEn      DateTime  @default(now())
+  jugadores     PartidaJugador[]
+  jugadas       Jugada[]
+
+  @@map("partidas")
+}
+
+model PartidaJugador {
+  id        String  @id @default(cuid())
+  partida   Partida @relation(fields: [partidaId], references: [id])
+  partidaId String
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String
+  equipo    Int
+
+  @@map("partida_jugadores")
+}
+
+model Jugada {
+  id        String   @id @default(cuid())
+  partida   Partida  @relation(fields: [partidaId], references: [id])
+  partidaId String
+  jugadorId String
+  tipo      String
+  dato      Json?
+  timestamp DateTime @default(now())
+
+  @@map("jugadas")
+}

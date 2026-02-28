@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-mesa: #14532d;
+  --color-carta: #fefce8;
+  --color-muestra: #fef08a;
+}
