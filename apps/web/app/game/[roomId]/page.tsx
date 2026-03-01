@@ -1,12 +1,11 @@
 'use client'
 import { useEffect } from 'react'
-import { use } from 'react'
 import { Board } from '../../../components/game/Board'
 import { getSocket } from '../../../lib/socket'
 import { useGameStore } from '../../../lib/store/gameStore'
 
-export default function GamePage({ params }: { params: Promise<{ roomId: string }> }) {
-  const { roomId } = use(params)
+export default function GamePage({ params }: { params: { roomId: string } }) {
+  const { roomId } = params
   const { setEstado } = useGameStore()
 
   useEffect(() => {

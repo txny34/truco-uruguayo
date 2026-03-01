@@ -7,3 +7,11 @@
   --color-carta: #fefce8;
   --color-muestra: #fef08a;
 }
+
+body {
+  background-color: #030d06;
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% -5%, rgba(21, 128, 61, 0.45) 0%, transparent 70%),
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.03) 1px, transparent 0);
+  background-size: auto, 28px 28px;
+}

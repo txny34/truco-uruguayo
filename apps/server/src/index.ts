@@ -18,22 +18,26 @@ const io = new Server(httpServer, {
   },
 })
 
-// Plugins
-await fastify.register(cors, { origin: true })
-await fastify.register(jwt, { secret: process.env.JWT_SECRET || 'dev-secret' })
+async function start() {
+  // Plugins
+  await fastify.register(cors, { origin: true })
+  await fastify.register(jwt, { secret: process.env.JWT_SECRET || 'dev-secret' })
 
-// REST Routes
-fastify.register(authRoutes, { prefix: '/api/auth' })
-fastify.register(statsRoutes, { prefix: '/api/stats' })
+  // REST Routes
+  fastify.register(authRoutes, { prefix: '/api/auth' })
+  fastify.register(statsRoutes, { prefix: '/api/stats' })
 
-// Health check
-fastify.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
+  // Health check
+  fastify.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
 
-// WebSocket handlers
-setupSocketHandlers(io)
+  // WebSocket handlers
+  setupSocketHandlers(io)
 
-// Start
-const port = Number(process.env.PORT) || 3001
-httpServer.listen({ port, host: '0.0.0.0' }, () => {
-  console.log(`🃏 Servidor Truco Uruguayo corriendo en http://localhost:${port}`)
-})
+  // Start
+  const port = Number(process.env.PORT) || 3001
+  httpServer.listen({ port, host: '0.0.0.0' }, () => {
+    console.log(`🃏 Servidor Truco Uruguayo corriendo en http://localhost:${port}`)
+  })
+}
+
+start()
