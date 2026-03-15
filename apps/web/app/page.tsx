@@ -58,18 +58,33 @@ export default function Home() {
         </p>
 
         {/* CTAs */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-16">
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <Link
-            href="/lobby"
+            href="/matchmaking"
             className="bg-yellow-500 hover:bg-yellow-400 text-black font-black py-4 px-10 rounded-2xl text-lg transition-all hover:scale-[1.02] shadow-xl shadow-yellow-500/20"
           >
-            Crear partida →
+            ⚔️ Partida competitiva →
           </Link>
           <Link
             href="/lobby"
             className="border border-green-700 hover:border-green-500 text-green-300 hover:text-white font-semibold py-4 px-10 rounded-2xl text-lg transition-colors bg-green-900/20"
           >
-            Unirse con código
+            👥 Sala libre
+          </Link>
+        </div>
+        <div className="flex gap-4 mb-16">
+          <Link
+            href="/lobby?vista=unirse"
+            className="text-green-500 hover:text-green-300 text-sm font-medium transition-colors"
+          >
+            Unirse a sala existente
+          </Link>
+          <span className="text-green-800">·</span>
+          <Link
+            href="/ranking"
+            className="text-green-500 hover:text-green-300 text-sm font-medium transition-colors"
+          >
+            🏆 Ver ranking ELO
           </Link>
         </div>
 

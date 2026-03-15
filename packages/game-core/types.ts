@@ -13,6 +13,8 @@ export interface Carta {
   oculta?: boolean      // para mostrar carta tapada de oponentes
 }
 
+export type DificultadBot = 'facil' | 'medio' | 'dificil'
+
 export interface Jugador {
   id: string
   nombre: string
@@ -22,6 +24,8 @@ export interface Jugador {
   listo: boolean
   conectado: boolean
   tieneFlorDeclarada: boolean
+  esBot?: boolean
+  dificultadBot?: DificultadBot
 }
 
 export interface CartaEnMesa {

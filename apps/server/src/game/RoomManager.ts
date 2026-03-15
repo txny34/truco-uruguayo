@@ -1,11 +1,13 @@
 import { TrucoEngine } from './TrucoEngine'
-import type { Jugador, EstadoJuego } from '@truco/game-core'
+import type { Jugador, EstadoJuego, DificultadBot } from '@truco/game-core'
 
 interface Sala {
   id: string
   engine: TrucoEngine
   tipo: 'publica' | 'privada'
+  anfitrionId: string
   jugadoresEsperando: string[]  // socketIds que aún no están listos
+  bots: Map<string, DificultadBot>  // botId → dificultad
   creadaEn: number
 }
 
@@ -21,7 +23,9 @@ export class RoomManager {
       id: salaId,
       engine: null as any, // se inicializa cuando hay suficientes jugadores
       tipo,
+      anfitrionId: '',
       jugadoresEsperando: [],
+      bots: new Map(),
       creadaEn: Date.now(),
     })
     return salaId
@@ -33,13 +37,30 @@ export class RoomManager {
     if (!sala.jugadoresEsperando.includes(socketId)) {
       sala.jugadoresEsperando.push(socketId)
     }
+    if (!sala.anfitrionId) sala.anfitrionId = socketId
     socketSala.set(socketId, salaId)
     return true
   }
 
+  static esAnfitrion(salaId: string, socketId: string): boolean {
+    return salas.get(salaId)?.anfitrionId === socketId
+  }
+
+  static agregarBot(salaId: string, botId: string, dificultad: DificultadBot): boolean {
+    const sala = salas.get(salaId)
+    if (!sala) return false
+    sala.bots.set(botId, dificultad)
+    sala.jugadoresEsperando.push(botId)
+    return true
+  }
+
+  static getDificultadBot(salaId: string, jugadorId: string): DificultadBot | null {
+    return salas.get(salaId)?.bots.get(jugadorId) ?? null
+  }
+
   static iniciarPartida(
     salaId: string,
-    jugadores: Pick<Jugador, 'id' | 'nombre' | 'equipo'>[]
+    jugadores: Pick<Jugador, 'id' | 'nombre' | 'equipo' | 'esBot' | 'dificultadBot'>[]
   ): boolean {
     const sala = salas.get(salaId)
     if (!sala) return false
@@ -76,5 +97,16 @@ export class RoomManager {
 
   static eliminarSala(salaId: string): void {
     salas.delete(salaId)
+  }
+
+  // Salas en espera (sin partida iniciada, con lugar)
+  static getSalasEnEspera(): { salaId: string; cantidadJugadores: number }[] {
+    const result: { salaId: string; cantidadJugadores: number }[] = []
+    for (const [id, sala] of salas) {
+      if (!sala.engine && sala.jugadoresEsperando.length > 0 && sala.jugadoresEsperando.length < 4) {
+        result.push({ salaId: id, cantidadJugadores: sala.jugadoresEsperando.length })
+      }
+    }
+    return result
   }
 }

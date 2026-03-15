@@ -12,7 +12,7 @@ export class TrucoEngine {
   private resultadosBazas: { baza: number; ganador: 1 | 2 | 'empate' }[] = []
   private turnoAntesCanto: string | null = null
 
-  constructor(salaId: string, jugadores: Pick<Jugador, 'id' | 'nombre' | 'equipo'>[]) {
+  constructor(salaId: string, jugadores: Pick<Jugador, 'id' | 'nombre' | 'equipo' | 'esBot' | 'dificultadBot'>[]) {
     this.estado = {
       salaId,
       fase: 'esperando',
@@ -31,7 +31,7 @@ export class TrucoEngine {
       envido: { estado: 'sin_cantar', ultimoCantador: null, puntosEnJuego: 2 },
       flor: { jugadoresConFlor: [], estado: 'sin_cantar', resuelta: false },
       puntaje: { equipo1: 0, equipo2: 0 },
-      puntajeMaximo: 30,
+      puntajeMaximo: 40,
       manoActual: 1,
       ganadorRonda: null,
       historial: [],
@@ -168,9 +168,9 @@ export class TrucoEngine {
     const envidoPendiente = this.estado.envido.estado === 'cantado'
 
     if (trucoPendiente) {
-      if (this.estado.truco.estado === 'cantado') this.estado.truco.valor = 3
-      else if (this.estado.truco.estado === 'retrucado') this.estado.truco.valor = 4
-      // vale_cuatro aceptado: se queda en 4
+      if (this.estado.truco.estado === 'cantado')     this.estado.truco.valor = 2
+      else if (this.estado.truco.estado === 'retrucado')  this.estado.truco.valor = 3
+      else if (this.estado.truco.estado === 'vale_cuatro') this.estado.truco.valor = 4
       this.estado.truco.estado = 'quiero'
       // Devolver turno al cantador para que siga jugando
       if (this.turnoAntesCanto) {
@@ -194,10 +194,16 @@ export class TrucoEngine {
     const envidoPendiente = this.estado.envido.estado === 'cantado'
 
     if (trucoPendiente) {
-      // El cantador gana los puntos que había en juego antes del canto
+      // El cantador gana los puntos de la instancia anterior aceptada:
+      //   truco no_querido  → 1 pt  (nada estaba acordado)
+      //   retruco no_querido → 2 pts (truco estaba acordado)
+      //   vale_cuatro no_querido → 3 pts (retruco estaba acordado)
+      const ptsNoQuiero =
+        this.estado.truco.estado === 'cantado'    ? 1 :
+        this.estado.truco.estado === 'retrucado'  ? 2 : 3
       const cantadorId = this.estado.truco.ultimoCantador!
       const cantador = this.estado.jugadores.find((j) => j.id === cantadorId)!
-      this._sumarPuntos(cantador.equipo, this.estado.truco.valor)
+      this._sumarPuntos(cantador.equipo, ptsNoQuiero)
       this.estado.truco.estado = 'no_quiero'
       this.estado.ganadorRonda = cantador.equipo
       this._finManoOPartida()
@@ -309,6 +315,7 @@ export class TrucoEngine {
   // ────────────────────────────────────────────
   evaluarRonda(): { ganador: 1 | 2 | 'empate' } {
     const palMuestra = this.estado.muestra?.palo ?? null
+    const valMuestra = this.estado.muestra?.valor ?? null
     const rankPorEquipo = [0, 0]
 
     for (const cartaEnMesa of this.estado.mesa) {
@@ -318,7 +325,8 @@ export class TrucoEngine {
         cartaEnMesa.carta.palo,
         palMuestra,
         cartaEnMesa.carta.esMuestra,
-        cartaEnMesa.carta.esComodin
+        cartaEnMesa.carta.esComodin,
+        valMuestra
       )
       const idx = jugador.equipo - 1
       if (rank > rankPorEquipo[idx]) rankPorEquipo[idx] = rank

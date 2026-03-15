@@ -13,7 +13,7 @@ const httpServer = createServer(fastify.server)
 // WebSocket server
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || true,
     methods: ['GET', 'POST'],
   },
 })
